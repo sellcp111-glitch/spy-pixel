@@ -4,16 +4,25 @@ import urllib.request
 
 app = Flask(__name__)
 
+# you must fill this in or it will not work...
+path_to_directory = "FILL THIS IN"
+
 # Serve a default page. This function is not required. Serving up a spy.gif for the homepage.
 @app.route('/')
 def my_function():
-    spy_meme = "/home/joshrehders/spy-pixel/flaskapp/spy.gif"
+    if path_to_directory == "FILL THIS IN":
+        content = "you need to fill in the path_to_directory variable in flaskapp.py"
+        return render_template_string('<pre>{{ content }}</pre>', content=content)
+    spy_meme = path_to_directory+"/spy-pixel/flaskapp/spy.gif"
     return send_file(spy_meme, mimetype="image/gif")
 
 @app.route('/listings')
 def display_text_file():
+    if path_to_directory == "FILL THIS IN":
+        content = "you need to fill in the path_to_directory variable in flaskapp.py"
+        return render_template_string('<pre>{{ content }}</pre>', content=content)
     try:
-        with open('/home/joshrehders/spy-pixel/spy_pixel_logs.txt', 'r') as file:
+        with open((path_to_directory+'/spy-pixel/spy_pixel_logs.txt'), 'r') as file:
             content = file.read()
     except FileNotFoundError:
         content = "File not found."
@@ -24,8 +33,11 @@ def display_text_file():
 
 @app.route('/image/<id>')
 def my_spy_pixel(id):
+    if path_to_directory == "FILL THIS IN":
+        content = "you need to fill in the path_to_directory variable in flaskapp.py"
+        return render_template_string('<pre>{{ content }}</pre>', content=content)
     # File path and name for 1 x 1 pixel. Must be an absolute path to pixel.
-    filename = "/home/joshrehders/spy-pixel/flaskapp/pixel.png"
+    filename = path_to_directory+"/spy-pixel/flaskapp/pixel.png"
     # Log the User-Agent String.
     user_agent = request.headers.get('User-Agent')
     # Get the current time of request and format time into readable format.
@@ -43,7 +55,7 @@ def my_spy_pixel(id):
     log_entry = f"Email {id} Opened:\nTimestamp: {timestamp}\nUser Agent: {user_agent}\nIP Address: {data}\n"
 
     # Write log to hardcoded path. Must be an absolute path to the log file.
-    with open('/home/joshrehders/spy-pixel/spy_pixel_logs.txt', 'a') as f:
+    with open((path_to_directory+'/spy-pixel/spy_pixel_logs.txt'), 'r') as file:
         f.write(log_entry)
 
     # Serve a transparent pixel image when navigating to .../image URL. "image/png" displays the image in PNG format.
