@@ -12,7 +12,7 @@ To deploy this web application, create a basic server using a VPS / cloud provid
 
 The following services need to be installed on cloud host, use your favorite package manager (`apt-get install`):
 - apache2
-- libapach2-mod-wsgi-py3
+- libapache2-mod-wsgi-py3
 - python-pip
 - python 3.8+
 
