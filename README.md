@@ -46,7 +46,7 @@ In `~/spy-pixel/flaskapp/flaskapp.py` set `path_to_directory` to match the absol
 
 Link the the app directory to site-root defined apache configuration `sudo ln -sT ~/spy-pixel/flaskapp /var/www/html/flaskapp`.
 
-💡 To check if this works use `echo "Hello World!" > index.html`. You should see this message when navigating to ubuntu@ec2-publicDNS.amazonaws.com.
+💡 To check if this works use `echo "Hello World!" > index.html`. You should see this message when navigating to ec2-publicDNS.amazonaws.com.
 
 ### Step 4
 
