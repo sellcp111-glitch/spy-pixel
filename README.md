@@ -42,6 +42,8 @@ Clone this repository: `git clone https://github.com/collinsmc23/spy-pixel`
 
 Change directories into the `cd ~/spy-pixel/flaskapp`.
 
+In `~/spy-pixel/flaskapp/flaskapp.py` set `path_to_directory` to match the absolute path to the directory you cloned the spy-pixel repo into. For example if it's in your home folder, you might set this: `path_to_directory = "/home/ubuntu"`. If you don't do this, you'll see a lovely page that tells you that you did not in fact do it...
+
 Link the the app directory to site-root defined apache configuration `sudo ln -sT ~/spy-pixel/flaskapp /var/www/html/flaskapp`.
 
 💡 To check if this works use `echo "Hello World!" > index.html`. You should see this message when navigating to ubuntu@ec2-publicDNS.amazonaws.com.
