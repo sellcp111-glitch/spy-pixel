@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 # Remplis ici le chemin absolu vers le dossier contenant "spy-pixel"
-path_to_directory = "/absolute/path/to/your/folder"
+path_to_directory = ""
 
 # Page d'accueil
 @app.route('/')
