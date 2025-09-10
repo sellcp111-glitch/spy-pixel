@@ -1,96 +1,72 @@
 from flask import Flask, send_file, request, render_template_string
 import datetime
 import urllib.request
+import os
 
 app = Flask(__name__)
 
-# you must fill this in or it will not work...
-path_to_directory = "FILL THIS IN"
+# Remplis ici le chemin absolu vers le dossier contenant "spy-pixel"
+path_to_directory = "/absolute/path/to/your/folder"
 
-# Serve a default page. This function is not required. Serving up a spy.gif for the homepage.
+# Page d'accueil
 @app.route('/')
 def my_function():
-    if path_to_directory == "FILL THIS IN":
-        content = "you need to fill in the path_to_directory variable in flaskapp.py"
+    if not os.path.exists(path_to_directory):
+        content = "Vous devez remplir la variable path_to_directory dans flaskapp.py"
         return render_template_string('<pre>{{ content }}</pre>', content=content)
-    spy_meme = path_to_directory+"/spy-pixel/flaskapp/spy.gif"
+    
+    spy_meme = os.path.join(path_to_directory, "spy-pixel", "flaskapp", "spy.gif")
     return send_file(spy_meme, mimetype="image/gif")
 
+# Affichage des logs
 @app.route('/logging')
 def display_text_file():
-    if path_to_directory == "FILL THIS IN":
-        content = "you need to fill in the path_to_directory variable in flaskapp.py"
+    log_file = os.path.join(path_to_directory, "spy-pixel", "spy_pixel_logs.txt")
+    if not os.path.exists(log_file):
+        content = "Fichier de logs introuvable."
         return render_template_string('<pre>{{ content }}</pre>', content=content)
-    try:
-        with open((path_to_directory+'/spy-pixel/spy_pixel_logs.txt'), 'r') as file:
-            content = file.read()
-    except FileNotFoundError:
-        content = "File not found."
-    except Exception as e:
-        content = f"An error occurred: {e}"
     
+    with open(log_file, 'r') as file:
+        content = file.read()
     return render_template_string('<pre>{{ content }}</pre>', content=content)
 
+# Pixel sans ID
 @app.route('/image')
 def my_spy_pixel_no_id():
-    if path_to_directory == "FILL THIS IN":
-        content = "you need to fill in the path_to_directory variable in flaskapp.py"
-        return render_template_string('<pre>{{ content }}</pre>', content=content)
-    # File path and name for 1 x 1 pixel. Must be an absolute path to pixel.
-    filename = path_to_directory+"/spy-pixel/flaskapp/pixel.png"
-    # Log the User-Agent String.
-    user_agent = request.headers.get('User-Agent')
-    # Get the current time of request and format time into readable format.
-    current_time = datetime.datetime.now()
-    timestamp = datetime.datetime.strftime(current_time, "%Y-%m-%d %H:%M:%S")
+    return log_and_send_pixel("")
 
-    # Log the IP address of requester.
-    get_ip = request.remote_addr
-
-    # Lookup Geolocation of IP Address.
-    with urllib.request.urlopen("http://ip-api.com/json/"+ get_ip) as url:
-        data = url.read().decode()
-
-    # Add User-Agent, Timestamp, and IP Address + Geolocation information to dictionary.
-    log_entry = f"Email Opened:\nTimestamp: {timestamp}\nUser Agent: {user_agent}\nIP Address Data: {data}\n"
-
-    # Write log to hardcoded path. Must be an absolute path to the log file.
-    with open((path_to_directory+'/spy-pixel/spy_pixel_logs.txt'), 'r') as file:
-        f.write(log_entry)
-
-    # Serve a transparent pixel image when navigating to .../image URL. "image/png" displays the image in PNG format.
-    return send_file(filename, mimetype="image/png")
-
+# Pixel avec ID
 @app.route('/image/<id>')
 def my_spy_pixel(id):
-    if path_to_directory == "FILL THIS IN":
-        content = "you need to fill in the path_to_directory variable in flaskapp.py"
-        return render_template_string('<pre>{{ content }}</pre>', content=content)
-    # File path and name for 1 x 1 pixel. Must be an absolute path to pixel.
-    filename = path_to_directory+"/spy-pixel/flaskapp/pixel.png"
-    # Log the User-Agent String.
-    user_agent = request.headers.get('User-Agent')
-    # Get the current time of request and format time into readable format.
-    current_time = datetime.datetime.now()
-    timestamp = datetime.datetime.strftime(current_time, "%Y-%m-%d %H:%M:%S")
+    return log_and_send_pixel(id)
 
-    # Log the IP address of requester.
+# Fonction pour log et renvoyer le pixel
+def log_and_send_pixel(id):
+    if not os.path.exists(path_to_directory):
+        content = "Vous devez remplir la variable path_to_directory dans flaskapp.py"
+        return render_template_string('<pre>{{ content }}</pre>', content=content)
+    
+    filename = os.path.join(path_to_directory, "spy-pixel", "flaskapp", "pixel.png")
+    log_file = os.path.join(path_to_directory, "spy-pixel", "spy_pixel_logs.txt")
+
+    user_agent = request.headers.get('User-Agent')
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     get_ip = request.remote_addr
 
-    # Lookup Geolocation of IP Address.
-    with urllib.request.urlopen("http://ip-api.com/json/"+ get_ip) as url:
-        data = url.read().decode()
+    # Géolocalisation IP
+    try:
+        with urllib.request.urlopen(f"http://ip-api.com/json/{get_ip}") as url:
+            data = url.read().decode()
+    except:
+        data = "Impossible de récupérer la géolocalisation."
 
-    # Add User-Agent, Timestamp, and IP Address + Geolocation information to dictionary.
-    log_entry = f"Email {id} Opened:\nTimestamp: {timestamp}\nUser Agent: {user_agent}\nIP Address Data: {data}\n"
+    log_entry = f"Email {id if id else 'Opened'}:\nTimestamp: {current_time}\nUser Agent: {user_agent}\nIP Address Data: {data}\n\n"
 
-    # Write log to hardcoded path. Must be an absolute path to the log file.
-    with open((path_to_directory+'/spy-pixel/spy_pixel_logs.txt'), 'r') as file:
-        f.write(log_entry)
+    # Écriture du log (création du fichier si inexistant)
+    with open(log_file, 'a') as file:
+        file.write(log_entry)
 
-    # Serve a transparent pixel image when navigating to .../image URL. "image/png" displays the image in PNG format.
     return send_file(filename, mimetype="image/png")
 
-
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
