@@ -3,54 +3,37 @@ import datetime
 import urllib.request
 import os
 
+# Instance Flask au niveau global
 app = Flask(__name__)
 
-# Remplis ici le chemin absolu vers le dossier contenant "spy-pixel"
-path_to_directory = ""
+# Chemin relatif : repo racine
+base_dir = os.path.dirname(os.path.abspath(__file__))
+path_to_directory = base_dir
 
-# Page d'accueil
 @app.route('/')
-def my_function():
-    if not os.path.exists(path_to_directory):
-        content = "Vous devez remplir la variable path_to_directory dans flaskapp.py"
-        return render_template_string('<pre>{{ content }}</pre>', content=content)
-    
+def home():
     spy_meme = os.path.join(path_to_directory, "spy-pixel", "flaskapp", "spy.gif")
+    if not os.path.exists(spy_meme):
+        return "Le fichier spy.gif est introuvable."
     return send_file(spy_meme, mimetype="image/gif")
 
-# Affichage des logs
 @app.route('/logging')
-def display_text_file():
+def logs():
     log_file = os.path.join(path_to_directory, "spy-pixel", "spy_pixel_logs.txt")
     if not os.path.exists(log_file):
-        content = "Fichier de logs introuvable."
-        return render_template_string('<pre>{{ content }}</pre>', content=content)
-    
-    with open(log_file, 'r') as file:
-        content = file.read()
+        return "Le fichier de logs est introuvable."
+    with open(log_file, 'r') as f:
+        content = f.read()
     return render_template_string('<pre>{{ content }}</pre>', content=content)
 
-# Pixel sans ID
 @app.route('/image')
-def my_spy_pixel_no_id():
-    return log_and_send_pixel("")
-
-# Pixel avec ID
 @app.route('/image/<id>')
-def my_spy_pixel(id):
-    return log_and_send_pixel(id)
-
-# Fonction pour log et renvoyer le pixel
-def log_and_send_pixel(id):
-    if not os.path.exists(path_to_directory):
-        content = "Vous devez remplir la variable path_to_directory dans flaskapp.py"
-        return render_template_string('<pre>{{ content }}</pre>', content=content)
-    
+def pixel(id=None):
     filename = os.path.join(path_to_directory, "spy-pixel", "flaskapp", "pixel.png")
     log_file = os.path.join(path_to_directory, "spy-pixel", "spy_pixel_logs.txt")
 
     user_agent = request.headers.get('User-Agent')
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     get_ip = request.remote_addr
 
     # Géolocalisation IP
@@ -60,13 +43,12 @@ def log_and_send_pixel(id):
     except:
         data = "Impossible de récupérer la géolocalisation."
 
-    log_entry = f"Email {id if id else 'Opened'}:\nTimestamp: {current_time}\nUser Agent: {user_agent}\nIP Address Data: {data}\n\n"
-
-    # Écriture du log (création du fichier si inexistant)
-    with open(log_file, 'a') as file:
-        file.write(log_entry)
+    log_entry = f"Email {id if id else 'Opened'}:\nTimestamp: {timestamp}\nUser Agent: {user_agent}\nIP Address Data: {data}\n\n"
+    with open(log_file, 'a') as f:
+        f.write(log_entry)
 
     return send_file(filename, mimetype="image/png")
 
-if __name__ == '__main__':
+# Exécution locale
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
